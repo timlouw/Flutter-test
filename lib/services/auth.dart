@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:async';
 
+import 'dart:async';
 
 
 class AuthService {
@@ -15,14 +15,9 @@ class AuthService {
   Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
   
   Future<FirebaseUser> login(String userEmail, String userPassword) async {
-    try {
       AuthResult result = await _auth.signInWithEmailAndPassword(email: userEmail, password: userPassword);
       print(result);
       return result.user;
-    } catch (e) {
-      print(e);
-      return e;
-    }
   } // Log User in with email and password and return Firebase User
 
 
@@ -34,7 +29,6 @@ class AuthService {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken
       );
-
       AuthResult result = await _auth.signInWithCredential(credential);
       print(result);
       return result.user;
@@ -47,6 +41,7 @@ class AuthService {
 
   Future<void> logOut() async {
     return _auth.signOut();
-  }
+  } // Log User out with google account and return Firebase User
+
 
 }
