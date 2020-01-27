@@ -10,38 +10,19 @@ import 'package:provider/provider.dart';
 
 void main() => runApp(MyApp());
 
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MultiProvider(
-//       providers: [
-//         StreamProvider<FirebaseUser>.value(value: AuthService().user),
-//       ],
-//       child: MaterialApp(
-//         home: Scaffold(
-//           appBar: AppBar(),
-//           body: new HomePage(),
-//           drawer: Drawer(),
-//           floatingActionButton: FloatingActionButton( onPressed: () {},),
-//         )
-//       )
-//     );
-//   }
-// }
-
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // StreamProvider<Report>.value(value: Global.reportRef.documentStream),
         StreamProvider<FirebaseUser>.value(value: AuthService().user),
       ],
       child: MaterialApp(
         // Firebase Analytics
-        navigatorObservers: [
-          FirebaseAnalyticsObserver(analytics: FirebaseAnalytics()),
-        ],
+        // navigatorObservers: [
+        //   FirebaseAnalyticsObserver(analytics: FirebaseAnalytics()),
+        // ],
 
         // Named Routes
         routes: {

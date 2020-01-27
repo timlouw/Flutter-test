@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../shared/shared.dart';
+// import '../shared/shared.dart';
 import '../services/services.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -24,6 +24,9 @@ class ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
+      drawer: Drawer(),
+      // body: 
     );
   }
 }

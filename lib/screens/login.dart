@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../shared/shared.dart';
+// import '../shared/shared.dart';
 import '../services/services.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -8,6 +8,7 @@ class LoginScreen extends StatefulWidget {
 
 class LoginScreenState extends State<LoginScreen> {
   AuthService auth = AuthService();
+  bool showForm = false;
 
   @override
   void initState() {
@@ -15,7 +16,7 @@ class LoginScreenState extends State<LoginScreen> {
     auth.getUser.then(
       (user) {
         if (user != null) {
-          Navigator.pushReplacementNamed(context, '/topics');
+          Navigator.pushReplacementNamed(context, '/profile');
         }
       },
     );
@@ -25,8 +26,7 @@ class LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.all(30),
-        decoration: BoxDecoration(),
+        padding: EdgeInsets.all(40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -39,13 +39,7 @@ class LoginScreenState extends State<LoginScreen> {
               style: Theme.of(context).textTheme.headline,
               textAlign: TextAlign.center,
             ),
-            Text('Your Tagline'),
-            LoginButton(
-              text: 'LOGIN WITH GOOGLE',
-              color: Colors.black45,
-              loginMethod: auth.googleLogin,
-            ),
-            LoginButton(text: 'Continue as Guest', loginMethod: auth.googleLogin)
+            showForm ? LoginForm() : LoginButtons(),
           ],
         ),
       ),
@@ -55,18 +49,18 @@ class LoginScreenState extends State<LoginScreen> {
 
 class LoginButton extends StatelessWidget {
   final Color color;
-  final IconData icon;
+  final icon;
   final String text;
   final Function loginMethod;
 
   const LoginButton(
-      {Key key, this.text, this.icon, this.color, this.loginMethod})
-      : super(key: key);
+    {Key key, this.text, this.icon, this.color, this.loginMethod}
+  ): super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 10),
+      margin: EdgeInsets.all(10),
       child: FlatButton.icon(
         padding: EdgeInsets.all(30),
         icon: Icon(icon, color: Colors.white),
@@ -74,7 +68,7 @@ class LoginButton extends StatelessWidget {
         onPressed: () async {
           var user = await loginMethod();
           if (user != null) {
-            Navigator.pushReplacementNamed(context, '/topics');
+            Navigator.pushReplacementNamed(context, '/profile');
           }
         },
         label: Expanded(
@@ -84,3 +78,57 @@ class LoginButton extends StatelessWidget {
     );
   }
 }
+
+
+
+class LoginForm extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(10),
+      child: Column(
+        children: <Widget>[
+          TextField(
+            obscureText: true,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Password',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LoginButtons extends StatelessWidget {
+  final Function loginMethodEmailPassword;
+  final Function loginMethodGoogle;
+
+  const LoginButtons(
+    {Key key, this.loginMethodEmailPassword, this.loginMethodGoogle}
+  ): super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(10),
+      child: Column(
+        children: <Widget>[
+          LoginButton(
+            text: 'Google Login',
+            color: Colors.black45,
+            loginMethod: loginMethodGoogle,
+            icon: Icon(
+              Icons.golf_course
+            ),
+          ),
+          LoginButton(text: 'Email & Password Login', color: Colors.black45, loginMethod: loginMethodEmailPassword)
+        ],
+      ),
+    );
+  }
+}
+
+            
+            
