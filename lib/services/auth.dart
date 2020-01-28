@@ -44,7 +44,7 @@ class AuthService {
   } // Log User in with google account and return Firebase User
 
 
-  Future<void> logOut() async {
+  Future<void> logout() async {
     return _auth.signOut();
   } // Log User out
 

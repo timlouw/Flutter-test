@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 // import '../shared/shared.dart';
 import '../services/services.dart';
@@ -9,11 +10,14 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   AuthService auth = AuthService();
   bool showForm = false;
-  toggleForm() {
+  void toggleForm() {
     setState(() {
       showForm = !showForm;
       print(showForm);
     });
+  }
+  bool isFormShowing() {
+    return showForm;
   }
 
   @override
@@ -41,18 +45,18 @@ class LoginScreenState extends State<LoginScreen> {
           ),
           Container(
             constraints: BoxConstraints(
-              minHeight: 340
+              minHeight: 390
             ),
             padding: EdgeInsets.all(30),
             child: Column(
               children: <Widget>[
                 Visibility(
                   visible: showForm, 
-                  child: LoginButtons(loginMethodGoogle: auth.googleLogin, toggleForm: toggleForm)
+                  child: LoginButtons(loginMethodGoogle: auth.googleLogin, toggleForm: toggleForm, isFormShowing: isFormShowing)
                 ),
                 Visibility(
                   visible: !showForm, 
-                  child: LoginForm(toggleForm: toggleForm, loginMethodEmailPassword: auth.login)
+                  child: LoginForm(toggleForm: toggleForm, loginMethodEmailPassword: auth.login, isFormShowing: isFormShowing)
                 )
               ],
             ),
@@ -73,9 +77,10 @@ class LoginScreenState extends State<LoginScreen> {
 class LoginButtons extends StatelessWidget {
   final Function loginMethodGoogle;
   final Function toggleForm;
+  final Function isFormShowing;
 
   const LoginButtons(
-    {Key key, this.loginMethodGoogle, this.toggleForm}
+    {Key key, this.loginMethodGoogle, this.toggleForm, this.isFormShowing}
   ): super(key: key);
 
   @override
@@ -88,7 +93,8 @@ class LoginButtons extends StatelessWidget {
         ),
         EPLoginButton(
           color: Colors.amber,
-          toggleForm: toggleForm
+          toggleForm: toggleForm,
+          isFormShowing: isFormShowing
         )
       ],
     );
@@ -104,19 +110,22 @@ class LoginButtons extends StatelessWidget {
 class LoginForm extends StatelessWidget {
   final Function loginMethodEmailPassword;
   final Function toggleForm;
+  final Function isFormShowing;
 
   const LoginForm(
-    {Key key, this.loginMethodEmailPassword, this.toggleForm}
+    {Key key, this.loginMethodEmailPassword, this.toggleForm, this.isFormShowing}
   ): super(key: key);
 
 
   @override
   Widget build(BuildContext context) {
+    TextStyle linkStyle = TextStyle(color: Colors.white70, fontSize: 15);
+
     return Container(
       child: Column(
         children: <Widget>[
           TextField(
-            // autofocus: true,
+            autofocus: true,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
               labelText: 'Email',
@@ -134,10 +143,26 @@ class LoginForm extends StatelessWidget {
           EPLoginButton(
             color: Colors.amber,
             loginMethod: loginMethodEmailPassword,
-            toggleForm: toggleForm
+            toggleForm: toggleForm,
+            isFormShowing: isFormShowing,
+          ),
+          SizedBox(height: 30),
+          RichText(
+            text: TextSpan(
+              style: linkStyle,
+              children: <TextSpan>[
+                TextSpan(
+                  text: 'Login Methods',
+                  style: linkStyle,
+                  recognizer: TapGestureRecognizer()..onTap = () {
+                    toggleForm();
+                  }
+                ),
+              ],
+            )
           )
-        ],
-      ),
+        ]
+      )
     );
   }
 }
@@ -171,7 +196,7 @@ class GoogleLoginButton extends StatelessWidget {
           }
         },
         label: Expanded(
-          child: Text('Login with Google', textAlign: TextAlign.center),
+          child: Text('Login with Google', textAlign: TextAlign.center, textScaleFactor: 1.2),
         ),
       ),
     );
@@ -189,10 +214,10 @@ class EPLoginButton extends StatelessWidget {
   final Color color;
   final Function loginMethod;
   final Function toggleForm;
-  final bool showForm;
+  final Function isFormShowing;
 
   const EPLoginButton(
-    {Key key, this.color, this.loginMethod, this.toggleForm, this.showForm}
+    {Key key, this.color, this.loginMethod, this.toggleForm, this.isFormShowing}
   ): super(key: key);
 
   @override
@@ -204,17 +229,17 @@ class EPLoginButton extends StatelessWidget {
         icon: Icon(IconData(57534, fontFamily: 'MaterialIcons'), color: Colors.white60, size: 28),
         color: color,
         onPressed: () async {
+          if (isFormShowing()) {
             toggleForm();
-          // if (showForm) {
-          //   var user = await loginMethod();
-          //   if (user != null) {
-          //     Navigator.pushReplacementNamed(context, '/profile');
-          //   }
-          // } else {
-          // } 
+          } else {
+            var user = await loginMethod();
+            if (user != null) {
+              Navigator.pushReplacementNamed(context, '/profile');
+            }
+          } 
         },
         label: Expanded(
-          child: Text('Email & Password Login', textAlign: TextAlign.center),
+          child: Text('Email & Password Login', textAlign: TextAlign.center, textScaleFactor: 1.2),
         ),
       ),
     );

@@ -14,8 +14,8 @@ class ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     auth.getUser.then(
       (user) {
-        if (user != null) {
-          Navigator.pushReplacementNamed(context, '/topics');
+        if (user == null) {
+          Navigator.pushReplacementNamed(context, '/');
         }
       },
     );
@@ -26,7 +26,24 @@ class ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(),
       drawer: Drawer(),
-      // body: 
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          FlatButton.icon(
+            color: Colors.red,
+            padding: EdgeInsets.all(30),
+            icon: Icon(IconData(57563, fontFamily: 'MaterialIcons'), color: Colors.white60, size: 28),
+            onPressed: () async {
+              await auth.logout();
+              Navigator.pushReplacementNamed(context, '/');
+            },
+            label: Expanded(
+              child: Text('Logout', textAlign: TextAlign.center, textScaleFactor: 1.2),
+            ),
+          ),
+        ],
+      )
     );
   }
 }
