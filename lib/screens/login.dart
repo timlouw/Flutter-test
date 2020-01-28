@@ -9,6 +9,12 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   AuthService auth = AuthService();
   bool showForm = false;
+  toggleForm() {
+    setState(() {
+      showForm = !showForm;
+      print(showForm);
+    });
+  }
 
   @override
   void initState() {
@@ -25,45 +31,138 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            FlutterLogo(
-              size: 150,
+      body: Column(
+        children: <Widget>[
+          SizedBox(height: 50),
+          Expanded(
+            child: FlutterLogo(
+              size: 200,
             ),
-            Text(
-              'Login to Start',
-              style: Theme.of(context).textTheme.headline,
-              textAlign: TextAlign.center,
+          ),
+          Container(
+            constraints: BoxConstraints(
+              minHeight: 340
             ),
-            showForm ? LoginForm() : LoginButtons(),
-          ],
+            padding: EdgeInsets.all(30),
+            child: Column(
+              children: <Widget>[
+                Visibility(
+                  visible: showForm, 
+                  child: LoginButtons(loginMethodGoogle: auth.googleLogin, toggleForm: toggleForm)
+                ),
+                Visibility(
+                  visible: !showForm, 
+                  child: LoginForm(toggleForm: toggleForm, loginMethodEmailPassword: auth.login)
+                )
+              ],
+            ),
+          )
+        ],
+      )
+    );
+  }
+}
+
+
+
+
+
+
+
+
+class LoginButtons extends StatelessWidget {
+  final Function loginMethodGoogle;
+  final Function toggleForm;
+
+  const LoginButtons(
+    {Key key, this.loginMethodGoogle, this.toggleForm}
+  ): super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        GoogleLoginButton(
+          color: Colors.blue,
+          loginMethod: loginMethodGoogle,
         ),
+        EPLoginButton(
+          color: Colors.amber,
+          toggleForm: toggleForm
+        )
+      ],
+    );
+  }
+}
+
+
+
+
+
+
+
+class LoginForm extends StatelessWidget {
+  final Function loginMethodEmailPassword;
+  final Function toggleForm;
+
+  const LoginForm(
+    {Key key, this.loginMethodEmailPassword, this.toggleForm}
+  ): super(key: key);
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          TextField(
+            // autofocus: true,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Email',
+            ),
+          ),
+          SizedBox(height: 20),
+          TextField(
+            obscureText: true,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Password',
+            ),
+          ),
+          SizedBox(height: 30),
+          EPLoginButton(
+            color: Colors.amber,
+            loginMethod: loginMethodEmailPassword,
+            toggleForm: toggleForm
+          )
+        ],
       ),
     );
   }
 }
 
-class LoginButton extends StatelessWidget {
+
+
+
+
+
+
+class GoogleLoginButton extends StatelessWidget {
   final Color color;
-  final icon;
-  final String text;
   final Function loginMethod;
 
-  const LoginButton(
-    {Key key, this.text, this.icon, this.color, this.loginMethod}
+  const GoogleLoginButton(
+    {Key key, this.color, this.loginMethod}
   ): super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(10),
+      margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
       child: FlatButton.icon(
-        padding: EdgeInsets.all(30),
-        icon: Icon(icon, color: Colors.white),
+        padding: EdgeInsets.all(25),
+        icon: Icon(IconData(59481, fontFamily: 'MaterialIcons'), color: Colors.white54, size: 28),
         color: color,
         onPressed: () async {
           var user = await loginMethod();
@@ -72,7 +171,7 @@ class LoginButton extends StatelessWidget {
           }
         },
         label: Expanded(
-          child: Text('$text', textAlign: TextAlign.center),
+          child: Text('Login with Google', textAlign: TextAlign.center),
         ),
       ),
     );
@@ -81,50 +180,42 @@ class LoginButton extends StatelessWidget {
 
 
 
-class LoginForm extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(10),
-      child: Column(
-        children: <Widget>[
-          TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Password',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
-class LoginButtons extends StatelessWidget {
-  final Function loginMethodEmailPassword;
-  final Function loginMethodGoogle;
 
-  const LoginButtons(
-    {Key key, this.loginMethodEmailPassword, this.loginMethodGoogle}
+
+
+
+class EPLoginButton extends StatelessWidget {
+  final Color color;
+  final Function loginMethod;
+  final Function toggleForm;
+  final bool showForm;
+
+  const EPLoginButton(
+    {Key key, this.color, this.loginMethod, this.toggleForm, this.showForm}
   ): super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(10),
-      child: Column(
-        children: <Widget>[
-          LoginButton(
-            text: 'Google Login',
-            color: Colors.black45,
-            loginMethod: loginMethodGoogle,
-            icon: Icon(
-              Icons.golf_course
-            ),
-          ),
-          LoginButton(text: 'Email & Password Login', color: Colors.black45, loginMethod: loginMethodEmailPassword)
-        ],
+      child: FlatButton.icon(
+        padding: EdgeInsets.all(30),
+        icon: Icon(IconData(57534, fontFamily: 'MaterialIcons'), color: Colors.white60, size: 28),
+        color: color,
+        onPressed: () async {
+            toggleForm();
+          // if (showForm) {
+          //   var user = await loginMethod();
+          //   if (user != null) {
+          //     Navigator.pushReplacementNamed(context, '/profile');
+          //   }
+          // } else {
+          // } 
+        },
+        label: Expanded(
+          child: Text('Email & Password Login', textAlign: TextAlign.center),
+        ),
       ),
     );
   }
