@@ -13,16 +13,9 @@ class AuthService {
   Future<FirebaseUser> get getUser => _auth.currentUser();
   Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
   
-  Future<FirebaseUser> login(String userEmail, String userPassword) async {
-    try {
+  Future login(String userEmail, String userPassword) async {
       AuthResult result = await _auth.signInWithEmailAndPassword(email: userEmail, password: userPassword);
-      print(result);
-      return result.user;
-    } catch (e) {
-      print(e);
-      return e;
-    }
-
+      return result;
   } // Log User in with email and password and return Firebase User
 
 

@@ -8,22 +8,19 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  AuthService auth = AuthService();
-  bool showForm = false;
+  AuthService _auth = AuthService();
+  bool _showForm = false;
   void toggleForm() {
-    setState(() {
-      showForm = !showForm;
-      print(showForm);
-    });
+    setState(() {_showForm = !_showForm;});
   }
   bool isFormShowing() {
-    return showForm;
+    return _showForm;
   }
 
   @override
   void initState() {
     super.initState();
-    auth.getUser.then(
+    _auth.getUser.then(
       (user) {
         if (user != null) {
           Navigator.pushReplacementNamed(context, '/profile');
@@ -37,26 +34,27 @@ class LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Column(
         children: <Widget>[
-          SizedBox(height: 50),
+          SizedBox(height: 40),
           Expanded(
             child: FlutterLogo(
               size: 200,
             ),
           ),
+          SizedBox(height: 20),
           Container(
             constraints: BoxConstraints(
-              minHeight: 390
+              minHeight: 340
             ),
-            padding: EdgeInsets.all(30),
+            padding: EdgeInsets.symmetric(horizontal: 30),
             child: Column(
               children: <Widget>[
                 Visibility(
-                  visible: showForm, 
-                  child: LoginButtons(loginMethodGoogle: auth.googleLogin, toggleForm: toggleForm, isFormShowing: isFormShowing)
+                  visible: _showForm, 
+                  child: LoginButtons(loginMethodGoogle: _auth.googleLogin, toggleForm: toggleForm, isFormShowing: isFormShowing)
                 ),
                 Visibility(
-                  visible: !showForm, 
-                  child: LoginForm(toggleForm: toggleForm, loginMethodEmailPassword: auth.login, isFormShowing: isFormShowing)
+                  visible: !_showForm, 
+                  child: LoginForm(toggleForm: toggleForm, loginMethodEmailPassword: _auth.login, isFormShowing: isFormShowing)
                 )
               ],
             ),
@@ -87,15 +85,32 @@ class LoginButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        GoogleLoginButton(
+        FlatButton.icon(
+          padding: EdgeInsets.all(20),
+          icon: Icon(IconData(59481, fontFamily: 'MaterialIcons'), color: Colors.white54, size: 28),
           color: Colors.blue,
-          loginMethod: loginMethodGoogle,
+          onPressed: () async {
+            var user = await loginMethodGoogle();
+            if (user != null) {
+              Navigator.pushReplacementNamed(context, '/profile');
+            }
+          },
+          label: Expanded(
+            child: Text('Google Account Login', textAlign: TextAlign.center, textScaleFactor: 1.2),
+          ),
         ),
-        EPLoginButton(
+        SizedBox(height: 20),
+        FlatButton.icon(
+          padding: EdgeInsets.all(20),
+          icon: Icon(IconData(57534, fontFamily: 'MaterialIcons'), color: Colors.white60, size: 28),
           color: Colors.amber,
-          toggleForm: toggleForm,
-          isFormShowing: isFormShowing
-        )
+          onPressed: () async {
+            toggleForm();
+          },
+          label: Expanded(
+            child: Text('Email & Password Login', textAlign: TextAlign.center, textScaleFactor: 1.2),
+          ),
+        ),
       ],
     );
   }
@@ -107,144 +122,113 @@ class LoginButtons extends StatelessWidget {
 
 
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {  createState() => LoginScreenState();
+}
+
+class LoginFormState extends State<LoginForm> {
   final Function loginMethodEmailPassword;
   final Function toggleForm;
   final Function isFormShowing;
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  String _error = '';
+  bool _showError = true;
 
-  const LoginForm(
+  LoginForm(
     {Key key, this.loginMethodEmailPassword, this.toggleForm, this.isFormShowing}
   ): super(key: key);
 
+  void dispose() {
+    // Clean up the controllers when the widget is disposed.
+    _emailController.dispose();
+    _passwordController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    TextStyle linkStyle = TextStyle(color: Colors.white70, fontSize: 15);
-
     return Container(
-      child: Column(
-        children: <Widget>[
-          TextField(
-            autofocus: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Email',
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: <Widget>[
+            TextFormField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Email',
+              ),
+              validator: (value) {
+                if (value.isEmpty) {
+                  return 'Please enter some text';
+                }
+                return null;
+              },
             ),
-          ),
-          SizedBox(height: 20),
-          TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Password',
+            SizedBox(height: 20),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Password',
+              ),
+              validator: (value) {
+                if (value.isEmpty) {
+                  return 'Please enter some text';
+                }
+                return null;
+              },
             ),
-          ),
-          SizedBox(height: 30),
-          EPLoginButton(
-            color: Colors.amber,
-            loginMethod: loginMethodEmailPassword,
-            toggleForm: toggleForm,
-            isFormShowing: isFormShowing,
-          ),
-          SizedBox(height: 30),
-          RichText(
-            text: TextSpan(
-              style: linkStyle,
-              children: <TextSpan>[
-                TextSpan(
-                  text: 'Login Methods',
-                  style: linkStyle,
-                  recognizer: TapGestureRecognizer()..onTap = () {
-                    toggleForm();
+            SizedBox(height: 12),
+            Visibility(
+              visible: _showError,
+              child: Text(_error, style: TextStyle(color: Colors.red, fontSize: 13),)
+            ),
+            SizedBox(height: 12),
+            FlatButton.icon(
+              padding: EdgeInsets.all(20),
+              icon: Icon(IconData(57534, fontFamily: 'MaterialIcons'), color: Colors.white60, size: 28),
+              color: Colors.amber,
+              onPressed: () async {
+                if (isFormShowing()) {
+                  toggleForm();
+                } else {
+                  if (_formKey.currentState.validate()) {
+                    loginMethodEmailPassword(_emailController.text, _passwordController.text).then((e) => {
+                      _showError = false,
+                      print(e),
+                      Navigator.pushReplacementNamed(context, '/profile')
+                    }).catchError((error) => {
+                      _showError = true,
+                      _error = error.code,
+                      print(error.code)
+                    });
                   }
-                ),
-              ],
+                } 
+              },
+              label: Expanded(
+                child: Text('Email & Password Login', textAlign: TextAlign.center, textScaleFactor: 1.2),
+              ),
+            ),
+            SizedBox(height: 30),
+            RichText(
+              text: TextSpan(
+                style: TextStyle(color: Colors.white70, fontSize: 15),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: 'Login Methods',
+                    style: TextStyle(color: Colors.white70, fontSize: 15),
+                    recognizer: TapGestureRecognizer()..onTap = () {
+                      toggleForm();
+                    }
+                  ),
+                ],
+              )
             )
-          )
-        ]
+          ]
+        )
       )
     );
   }
-}
-
-
-
-
-
-
-
-class GoogleLoginButton extends StatelessWidget {
-  final Color color;
-  final Function loginMethod;
-
-  const GoogleLoginButton(
-    {Key key, this.color, this.loginMethod}
-  ): super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
-      child: FlatButton.icon(
-        padding: EdgeInsets.all(25),
-        icon: Icon(IconData(59481, fontFamily: 'MaterialIcons'), color: Colors.white54, size: 28),
-        color: color,
-        onPressed: () async {
-          var user = await loginMethod();
-          if (user != null) {
-            Navigator.pushReplacementNamed(context, '/profile');
-          }
-        },
-        label: Expanded(
-          child: Text('Login with Google', textAlign: TextAlign.center, textScaleFactor: 1.2),
-        ),
-      ),
-    );
-  }
-}
-
-
-
-
-
-
-
-
-class EPLoginButton extends StatelessWidget {
-  final Color color;
-  final Function loginMethod;
-  final Function toggleForm;
-  final Function isFormShowing;
-
-  const EPLoginButton(
-    {Key key, this.color, this.loginMethod, this.toggleForm, this.isFormShowing}
-  ): super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(10),
-      child: FlatButton.icon(
-        padding: EdgeInsets.all(30),
-        icon: Icon(IconData(57534, fontFamily: 'MaterialIcons'), color: Colors.white60, size: 28),
-        color: color,
-        onPressed: () async {
-          if (isFormShowing()) {
-            toggleForm();
-          } else {
-            var user = await loginMethod();
-            if (user != null) {
-              Navigator.pushReplacementNamed(context, '/profile');
-            }
-          } 
-        },
-        label: Expanded(
-          child: Text('Email & Password Login', textAlign: TextAlign.center, textScaleFactor: 1.2),
-        ),
-      ),
-    );
-  }
-}
-
-            
-            
+}     
