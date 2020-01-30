@@ -9,9 +9,20 @@ class LoginScreen extends StatefulWidget {
 
 class LoginScreenState extends State<LoginScreen> {
   AuthService _auth = AuthService();
+  String _error = '';
+  bool _showError = false;
   bool _showForm = false;
   void toggleForm() {
     setState(() {_showForm = !_showForm;});
+  }
+  void hideError() {
+    setState(() {_showError = false;});
+  }
+  void setError(String error) {
+    setState(() {
+      _showError = !_showError;
+      _error = error;
+    });
   }
   bool isFormShowing() {
     return _showForm;
@@ -40,7 +51,15 @@ class LoginScreenState extends State<LoginScreen> {
               size: 200,
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 7),
+          Visibility(
+            visible: _showError,
+            maintainState: true,
+            maintainAnimation: true,
+            maintainSize: true,
+            child: Text(_error, style: TextStyle(color: Colors.red, fontSize: 13),)
+          ),
+          SizedBox(height: 7),
           Container(
             constraints: BoxConstraints(
               minHeight: 340
@@ -54,7 +73,7 @@ class LoginScreenState extends State<LoginScreen> {
                 ),
                 Visibility(
                   visible: !_showForm, 
-                  child: LoginForm(toggleForm: toggleForm, loginMethodEmailPassword: _auth.login, isFormShowing: isFormShowing)
+                  child: LoginForm(toggleForm: toggleForm, loginMethodEmailPassword: _auth.login, isFormShowing: isFormShowing, hideError: hideError, setError: setError,)
                 )
               ],
             ),
@@ -122,21 +141,19 @@ class LoginButtons extends StatelessWidget {
 
 
 
-class LoginForm extends StatefulWidget {  createState() => LoginScreenState();
-}
-
-class LoginFormState extends State<LoginForm> {
+class LoginForm extends StatelessWidget {
   final Function loginMethodEmailPassword;
   final Function toggleForm;
   final Function isFormShowing;
+  final Function setError;
+  final Function hideError;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _error = '';
-  bool _showError = true;
+  final _formValidationService = FormValidationService();
 
   LoginForm(
-    {Key key, this.loginMethodEmailPassword, this.toggleForm, this.isFormShowing}
+    {Key key, this.loginMethodEmailPassword, this.toggleForm, this.isFormShowing, this.hideError, this.setError, }
   ): super(key: key);
 
   void dispose() {
@@ -159,10 +176,13 @@ class LoginFormState extends State<LoginForm> {
                 labelText: 'Email',
               ),
               validator: (value) {
-                if (value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
+                return _formValidationService.validateValue(
+                  value, 
+                  r'^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$', 
+                  true, 
+                  "Email is not valid", 
+                  "Enter your email"
+                );
               },
             ),
             SizedBox(height: 20),
@@ -174,18 +194,10 @@ class LoginFormState extends State<LoginForm> {
                 labelText: 'Password',
               ),
               validator: (value) {
-                if (value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
+                return _formValidationService.validateValue(value, r'^.{6,}$', true, "Minimum of any 6 characters", "Enter your password");
               },
             ),
-            SizedBox(height: 12),
-            Visibility(
-              visible: _showError,
-              child: Text(_error, style: TextStyle(color: Colors.red, fontSize: 13),)
-            ),
-            SizedBox(height: 12),
+            SizedBox(height: 20),
             FlatButton.icon(
               padding: EdgeInsets.all(20),
               icon: Icon(IconData(57534, fontFamily: 'MaterialIcons'), color: Colors.white60, size: 28),
@@ -196,12 +208,11 @@ class LoginFormState extends State<LoginForm> {
                 } else {
                   if (_formKey.currentState.validate()) {
                     loginMethodEmailPassword(_emailController.text, _passwordController.text).then((e) => {
-                      _showError = false,
+                      hideError(),
                       print(e),
                       Navigator.pushReplacementNamed(context, '/profile')
                     }).catchError((error) => {
-                      _showError = true,
-                      _error = error.code,
+                      setError(error.code),
                       print(error.code)
                     });
                   }
@@ -221,6 +232,7 @@ class LoginFormState extends State<LoginForm> {
                     style: TextStyle(color: Colors.white70, fontSize: 15),
                     recognizer: TapGestureRecognizer()..onTap = () {
                       toggleForm();
+                      hideError();
                     }
                   ),
                 ],

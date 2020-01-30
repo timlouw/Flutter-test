@@ -20,9 +20,9 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         // Firebase Analytics
-        // navigatorObservers: [
-        //   FirebaseAnalyticsObserver(analytics: FirebaseAnalytics()),
-        // ],
+        navigatorObservers: [
+          FirebaseAnalyticsObserver(analytics: FirebaseAnalytics()),
+        ],
 
         // Named Routes
         routes: {

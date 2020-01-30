@@ -1,25 +1,25 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
 
 class AuthService {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Firestore _db = Firestore.instance;
+  // final Firestore _db = Firestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   Future<FirebaseUser> get getUser => _auth.currentUser();
   Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
   
-  Future login(String userEmail, String userPassword) async {
+  Future<AuthResult> login(String userEmail, String userPassword) async {
       AuthResult result = await _auth.signInWithEmailAndPassword(email: userEmail, password: userPassword);
       return result;
   } // Log User in with email and password and return Firebase User
 
 
-  Future<FirebaseUser> googleLogin() async {
+  Future<AuthResult> googleLogin() async {
     try {
       GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
       GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
@@ -29,7 +29,7 @@ class AuthService {
       );
       AuthResult result = await _auth.signInWithCredential(credential);
       print(result);
-      return result.user;
+      return result;
     } catch (e) {
       print(e);
       return e;

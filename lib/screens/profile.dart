@@ -8,6 +8,7 @@ class ProfileScreen extends StatefulWidget {
 
 class ProfileScreenState extends State<ProfileScreen> {
   AuthService auth = AuthService();
+  DatabaseService db = DatabaseService();
 
   @override
   void initState() {
@@ -40,6 +41,19 @@ class ProfileScreenState extends State<ProfileScreen> {
             },
             label: Expanded(
               child: Text('Logout', textAlign: TextAlign.center, textScaleFactor: 1.2),
+            ),
+          ),
+          SizedBox(height: 50),
+          FlatButton.icon(
+            color: Colors.red,
+            padding: EdgeInsets.all(30),
+            icon: Icon(IconData(57563, fontFamily: 'MaterialIcons'), color: Colors.white60, size: 28),
+            onPressed: () async {
+              var dbresult = await db.testconnection();
+              print(dbresult);
+            },
+            label: Expanded(
+              child: Text('Test DB', textAlign: TextAlign.center, textScaleFactor: 1.2),
             ),
           ),
         ],
