@@ -29,4 +29,10 @@ export const connectANDPull = functions.https.onCall(async(data, context) => {
             reject(error)
         })
     })
+});
+
+export const roundtriptest = functions.https.onCall(async(data, context) => {
+    console.log('hello');
+    console.log(10*10*10*10*10*10*10*440*5454654*4546);
+    return null;
 })
