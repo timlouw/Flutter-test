@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 const sql = require('mssql');
 
-export const connectANDPull = functions.https.onCall(async(data, context) => {
+export const sqlCloud = functions.https.onCall(async(data, context) => {
     var sqlConfig = {
         user: 'sa',
         password: '$m@rtHR7',
@@ -31,8 +31,7 @@ export const connectANDPull = functions.https.onCall(async(data, context) => {
     })
 });
 
-export const roundtriptest = functions.https.onCall(async(data, context) => {
-    console.log('hello');
-    console.log(10*10*10*10*10*10*10*440*5454654*4546);
+export const plainCloud = functions.https.onCall(async(data, context) => {
+    console.log('plain called');
     return null;
 })
