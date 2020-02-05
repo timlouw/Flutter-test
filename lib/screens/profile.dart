@@ -49,7 +49,7 @@ class ProfileScreenState extends State<ProfileScreen> {
             padding: EdgeInsets.all(5),
             icon: Icon(IconData(57563, fontFamily: 'MaterialIcons'), color: Colors.white60, size: 28),
             onPressed: () async {
-              await db.callFunction('sqlCloud');
+              await db.callFunction('sqlCloudasdasdasd');
             },
             label: Expanded(
               child: Text('SQL Cloud Function', textAlign: TextAlign.center, textScaleFactor: 1.2),
