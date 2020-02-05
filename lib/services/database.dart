@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DatabaseService {
   var  db = Firestore.instance;
+  Stream get stats => db.collection('stats').document('stats').snapshots();
+
 
   initState() {
     db.settings(persistenceEnabled: false);
@@ -36,9 +38,6 @@ class DatabaseService {
     });
   }
 
-  getStats() {
-    return;
-  }
 
   logTimeTakenForRequest(String typeOfRequest, int timeTakenMS) {
     print(typeOfRequest + '  =  ' + timeTakenMS.toString());
@@ -59,6 +58,14 @@ class DatabaseService {
       } 
       break;
 
+      case 'sqlCloudSS': { 
+        db.collection('stats').document('stats').setData({
+          'sqlCloudSSTotalCalls': FieldValue.increment(1),
+          'sqlCloudSSTotalMS': FieldValue.increment(timeTakenMS)
+        }, merge: true);
+      } 
+      break;
+
       case 'equalFirestore': { 
         db.collection('stats').document('stats').setData({
           'equalFirestoreTotalCalls': FieldValue.increment(1),
@@ -73,7 +80,7 @@ class DatabaseService {
           'filledFirestoreTotalMS': FieldValue.increment(timeTakenMS)
         }, merge: true);
       } 
-      break; 
+      break;
     }
     print('done logging time');
   }
