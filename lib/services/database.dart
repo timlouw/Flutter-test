@@ -13,7 +13,10 @@ class DatabaseService {
   callFunction(String callableFuncName) async {
     var startTime = DateTime.now();
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: callableFuncName);
-    callable.call().then((e) => {
+    callable.call(<String, dynamic>{
+      'SQLQuery': "select top 10 * from Users",
+    }).then((e) => {
+      print(e.data),
       logTimeTakenForRequest(callableFuncName, DateTime.now().difference(startTime).inMilliseconds),
     }).catchError((error) => {
       print(error)

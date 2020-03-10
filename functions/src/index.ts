@@ -48,7 +48,7 @@ export const sqlCloudSS = functions.https.onCall(async(data, context) => {
         server: '160.119.141.249',
         database: 'SmartHR_Demo',
         options: {
-            instanceName: 'SQL2014',
+            instanceName: 'SQL2017',
             encrypt: true
        }
     };
@@ -56,8 +56,10 @@ export const sqlCloudSS = functions.https.onCall(async(data, context) => {
     return new Promise((resolve, reject) => {
         console.log("sql connecting......")
         sql.connect(sqlConfig).then((d: any) => {
+            console.log('connected')
             let requestObj = new sql.Request();
-            requestObj.query("select * from Users").then((e: any) => {
+            requestObj.query(data.SQLQuery).then((e: any) => {
+                console.log('query')
                 console.log(e)
                 resolve(e)
             }).catch((error: any) => {
